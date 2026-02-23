@@ -39,12 +39,16 @@
             contenedor.innerHTML = ''; 
 
             data.forEach(item => {
-                const p = document.createElement('p');
-                // IMPORTANTE: Cambia 'Zapatillas' y 'precio' por los nombres 
-                // de las columnas que pusiste en tu CSV (ej: nombre, precio)
-                p.textContent = `${item.Nombre} - ${item.Precio}€`;
-                contenedor.appendChild(p);
-            });
+    const card = document.createElement('div');
+    card.style = "border: 1px solid #ddd; padding: 10px; margin: 10px; border-radius: 8px; display: inline-block; width: 200px;";
+    
+    // Sustituye 'Zapatillas' y '59.99' por tus nombres de columna reales
+    card.innerHTML = `
+        <h3>${item.Nombre}</h3>
+        <p style="color: green; font-weight: bold;">${item.Precio || item['Precio']}€</p>
+    `;
+    contenedor.appendChild(card);
+});
         }
 
         obtenerDatos();
