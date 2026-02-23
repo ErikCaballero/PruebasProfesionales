@@ -5,43 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Tienda Dinámica</title>
    <script>
-    // 1. PEGA AQUÍ TU URL DE SHEETDB
-    const API_URL = "https://sheetdb.io/api/v1/abcm0s44xz0wz";
+    // 1. Configurar la conexión
+const _supabaseUrl = 'https://cbtvetmvxvxhidsgpcoh.supabase.co';
+const _supabaseKey = 'sb_publishable_bCknmeioOfuD-0dyG2x7ZA_Yfx1PHB3';
+const supabase = supabase.createClient(_supabaseUrl, _supabaseKey);
 
-    async function cargarTienda() {
-        const contenedor = document.getElementById("contenedor");
+async function obtenerDatos() {
+    // 2. Hacer la consulta a tu tabla
+    const { data, error } = await supabase
+        .from('Snacks') // Cambia esto por el nombre real de tu tabla
+        .select('*');
 
-        try {
-            // Pedimos los datos a SheetDB
-            const respuesta = await fetch(API_URL);
-            const productos = await respuesta.json(); // Esto ya nos da una lista de objetos
-
-            let nuevoHTML = "";
-
-            // 2. Recorremos la lista de productos automáticamente
-            productos.forEach(item => {
-                // 'Producto' y 'Precio' deben ser los nombres de tus columnas en Excel
-                const nombre = item.Producto; 
-                const precio = item.Precio;
-
-                if (nombre) {
-                    nuevoHTML += `
-                        <div class="card">
-                            <span class="nombre">${nombre}</span>
-                            <span class="precio">${precio}€</span>
-                        </div>`;
-                }
-            });
-
-            contenedor.innerHTML = nuevoHTML;
-
-        } catch (error) {
-            console.error("Error al cargar los datos:", error);
-            contenedor.innerHTML = "<p>Error al conectar con la base de datos.</p>";
-        }
+    if (error) {
+        console.error('Error al obtener datos:', error);
+        return;
     }
 
-    cargarTienda();
+    // 3. Mostrar los datos en el HTML
+    const contenedor = document.getElementById('lista-productos');
+    contenedor.innerHTML = ''; // Limpiar el "Cargando..."
+
+    data.forEach(item => {
+        const p = document.createElement('p');
+        // Usamos los nombres de columnas de tu CSV (Zapatillas, 59.99, etc.)
+        p.textContent = `${item.nombre_columna_producto} - $${item.nombre_columna_precio}`;
+        contenedor.appendChild(p);
+    });
+}
+
+obtenerDatos();
 </script>
+    <header>
+        <h1>Snacks</h1>
+    </header>
 </body>
 </html>
