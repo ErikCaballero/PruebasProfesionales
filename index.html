@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h1>Mi Tienda Online</h1>
+  
+  <p>Zapatillas: <span id="precio-zapatillas">Cargando...</span>€</p>
+  <p>Camiseta: <span id="precio-camiseta">Cargando...</span>€</p>
+
+  <script>
+    // PEGA AQUÍ EL ENLACE QUE COPIASTE DE GOOGLE SHEETS
+    const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ4drWSWgB5EXLGqTrbu9viXwTSzrsAHRuV6Y5u5alduFn0o9ceWjeTFsP8oaanypnQAZyauW7i6HaV/pub?output=csv";
+
+    async function obtenerPrecios() {
+      const respuesta = await fetch(urlCSV);
+      const texto = await respuesta.text();
+      
+      // Convertimos el texto CSV en filas y columnas
+      const filas = texto.split("\n").map(fila => fila.split(","));
+
+      // filas[1] es la segunda fila (Zapatillas), el precio está en la columna [1]
+      document.getElementById("precio-zapatillas").innerText = filas[1][1];
+      
+      // filas[2] es la tercera fila (Camiseta), el precio está en la columna [1]
+      document.getElementById("precio-camiseta").innerText = filas[2][1];
+    }
+
+    obtenerPrecios();
+  </script>
+</body>
+</html>
