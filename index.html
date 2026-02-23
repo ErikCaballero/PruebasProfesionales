@@ -4,82 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Tienda Dinámica</title>
-    <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 20px; color: #333; }
-        h1 { text-align: center; color: #2c3e50; }
-        
-        /* Contenedor de la cuadrícula */
-        .grid-productos {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 20px;
-            max-width: 1000px;
-            margin: 20px auto;
-        }
+   <script>
+    // 1. PEGA AQUÍ TU URL DE SHEETDB
+    const API_URL = "https://sheetdb.io/api/v1/abcm0s44xz0wz";
 
-        /* Tarjeta de producto */
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-        }
-
-        .card:hover { transform: translateY(-5px); }
-        .nombre { font-weight: bold; font-size: 1.1em; display: block; margin-bottom: 10px; text-transform: capitalize; }
-        .precio { color: #27ae60; font-size: 1.3em; font-weight: bold; }
-        .unidad { font-size: 0.7em; color: #7f8c8d; }
-    </style>
-</head>
-<body>
-
-    <h1>Lista de Productos</h1>
-
-    <div class="grid-productos" id="contenedor">
-        </div>
-
-    <script>
-        // 1. REEMPLAZA ESTO con tu enlace de Google Sheets (formato CSV)
-        const URL_CSV = "https://sheetdb.io/api/v1/abcm0s44xz0wz";
-
-        // Lista de productos extraída de tu imagen
-        async function cargarTienda() {
-    try {
-        const response = await fetch(URL_CSV);
-        const data = await response.text();
-        
-        // Dividimos el contenido por filas
-        const filas = data.split("\n");
-        
+    async function cargarTienda() {
         const contenedor = document.getElementById("contenedor");
-        contenedor.innerHTML = ""; // Limpiamos el contenedor
 
-        // Empezamos en i = 1 para saltarnos la fila de títulos (Producto, Precio)
-        for (let i = 1; i < filas.length; i++) {
-            const columnas = filas[i].split(",");
-            
-            // Verificamos que la fila tenga al menos nombre y precio
-            if (columnas.length >= 2 && columnas[0].trim() !== "") {
-                const nombreProducto = columnas[0].trim();
-                const precioProducto = columnas[1].trim();
-                
-                // Creamos la tarjeta visualmente
-                contenedor.innerHTML += `
-                    <div class="card">
-                        <span class="nombre">${nombreProducto}</span>
-                        <span class="precio">${precioProducto}<span class="unidad">€</span></span>
-                    </div>
-                `;
-            }
+        try {
+            // Pedimos los datos a SheetDB
+            const respuesta = await fetch(API_URL);
+            const productos = await respuesta.json(); // Esto ya nos da una lista de objetos
+
+            let nuevoHTML = "";
+
+            // 2. Recorremos la lista de productos automáticamente
+            productos.forEach(item => {
+                // 'Producto' y 'Precio' deben ser los nombres de tus columnas en Excel
+                const nombre = item.Producto; 
+                const precio = item.Precio;
+
+                if (nombre) {
+                    nuevoHTML += `
+                        <div class="card">
+                            <span class="nombre">${nombre}</span>
+                            <span class="precio">${precio}€</span>
+                        </div>`;
+                }
+            });
+
+            contenedor.innerHTML = nuevoHTML;
+
+        } catch (error) {
+            console.error("Error al cargar los datos:", error);
+            contenedor.innerHTML = "<p>Error al conectar con la base de datos.</p>";
         }
-    } catch (error) {
-        console.error("Error cargando la base de datos:", error);
     }
-}
 
-        cargarTienda();
-    </script>
+    cargarTienda();
+</script>
 </body>
 </html>
