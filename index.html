@@ -3,40 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Tienda Dinámica</title>
-   <script>
-    // 1. Configurar la conexión
-const _supabaseUrl = 'https://cbtvetmvxvxhidsgpcoh.supabase.co';
-const _supabaseKey = 'sb_publishable_bCknmeioOfuD-0dyG2x7ZA_Yfx1PHB3';
-const supabase = supabase.createClient(_supabaseUrl, _supabaseKey);
-
-async function obtenerDatos() {
-    // 2. Hacer la consulta a tu tabla
-    const { data, error } = await supabase
-        .from('Snacks') // Cambia esto por el nombre real de tu tabla
-        .select('*');
-
-    if (error) {
-        console.error('Error al obtener datos:', error);
-        return;
-    }
-
-    // 3. Mostrar los datos en el HTML
-    const contenedor = document.getElementById('lista-productos');
-    contenedor.innerHTML = ''; // Limpiar el "Cargando..."
-
-    data.forEach(item => {
-        const p = document.createElement('p');
-        // Usamos los nombres de columnas de tu CSV (Zapatillas, 59.99, etc.)
-        p.textContent = `${item.nombre_columna_producto} - $${item.nombre_columna_precio}`;
-        contenedor.appendChild(p);
-    });
-}
-
-obtenerDatos();
-</script>
+    <title>Mi Tienda de Snacks</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
     <header>
-        <h1>Snacks</h1>
+        <h1>Mis Snacks</h1>
     </header>
+
+    <div id="lista-productos">
+        <p>Cargando snacks deliciosos...</p>
+    </div>
+
+    <script>
+        // Configuración
+        const _supabaseUrl = 'https://cbtvetmvxvxhidsgpcoh.supabase.co';
+        const _supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNidHZldG12eHZ4aGlkc2dwY29oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4MzM4NzMsImV4cCI6MjA4NzQwOTg3M30.kphDJaqTCBzHuDSraol0gaDOTMfYf7eHNHaQGy3Ab7o'; // ¡Asegúrate de que sea la 'anon public'!
+        
+        // Inicializar el cliente (usando el objeto global de la librería)
+        const supabaseClient = supabase.createClient(_supabaseUrl, _supabaseKey);
+
+        async function obtenerDatos() {
+            const { data, error } = await supabaseClient
+                .from('Snacks') 
+                .select('*');
+
+            if (error) {
+                console.error('Error:', error);
+                document.getElementById('lista-productos').innerHTML = "Error al cargar datos.";
+                return;
+            }
+
+            const contenedor = document.getElementById('lista-productos');
+            contenedor.innerHTML = ''; 
+
+            data.forEach(item => {
+                const p = document.createElement('p');
+                // IMPORTANTE: Cambia 'Zapatillas' y 'precio' por los nombres 
+                // de las columnas que pusiste en tu CSV (ej: nombre, precio)
+                p.textContent = `${item.Zapatillas} - ${item.precio}€`;
+                contenedor.appendChild(p);
+            });
+        }
+
+        obtenerDatos();
+    </script>
 </body>
 </html>
