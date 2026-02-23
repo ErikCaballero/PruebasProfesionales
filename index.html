@@ -1,30 +1,89 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Tienda Dinámica</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 20px; color: #333; }
+        h1 { text-align: center; color: #2c3e50; }
+        
+        /* Contenedor de la cuadrícula */
+        .grid-productos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 20px auto;
+        }
+
+        /* Tarjeta de producto */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .card:hover { transform: translateY(-5px); }
+        .nombre { font-weight: bold; font-size: 1.1em; display: block; margin-bottom: 10px; text-transform: capitalize; }
+        .precio { color: #27ae60; font-size: 1.3em; font-weight: bold; }
+        .unidad { font-size: 0.7em; color: #7f8c8d; }
+    </style>
+</head>
 <body>
-  <h1>Mi Tienda Online</h1>
-  
-  <p>Zapatillas: <span id="precio-zapatillas">Cargando...</span>€</p>
-  <p>Camiseta: <span id="precio-camiseta">Cargando...</span>€</p>
 
-  <script>
-    // PEGA AQUÍ EL ENLACE QUE COPIASTE DE GOOGLE SHEETS
-    const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ4drWSWgB5EXLGqTrbu9viXwTSzrsAHRuV6Y5u5alduFn0o9ceWjeTFsP8oaanypnQAZyauW7i6HaV/pub?output=csv";
+    <h1>Lista de Productos</h1>
 
-    async function obtenerPrecios() {
-      const respuesta = await fetch(urlCSV);
-      const texto = await respuesta.text();
-      
-      // Convertimos el texto CSV en filas y columnas
-      const filas = texto.split("\n").map(fila => fila.split(","));
+    <div class="grid-productos" id="contenedor">
+        </div>
 
-      // filas[1] es la segunda fila (Zapatillas), el precio está en la columna [1]
-      document.getElementById("precio-zapatillas").innerText = filas[1][1];
-      
-      // filas[2] es la tercera fila (Camiseta), el precio está en la columna [1]
-      document.getElementById("precio-camiseta").innerText = filas[2][1];
-    }
+    <script>
+        // 1. REEMPLAZA ESTO con tu enlace de Google Sheets (formato CSV)
+        const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ4drWSWgB5EXLGqTrbu9viXwTSzrsAHRuV6Y5u5alduFn0o9ceWjeTFsP8oaanypnQAZyauW7i6HaV/pub?output=csv";
 
-    obtenerPrecios();
-  </script>
+        // Lista de productos extraída de tu imagen
+        const productos = [
+            "Zapatillas", "Camiseta", "Mesa", "Armario", 
+            "Chuche", "camion", "snack", "Chocolate", 
+            "BomBom", "piruleta"
+        ];
+
+        async function cargarTienda() {
+            try {
+                const response = await fetch(URL_CSV);
+                const data = await response.text();
+                const filas = data.split("\n");
+                
+                // Creamos un mapa de precios para buscar rápido { "Zapatillas": "59.99", ... }
+                const mapaPrecios = {};
+                filas.forEach(fila => {
+                    const columnas = fila.split(",");
+                    if(columnas.length >= 2) {
+                        mapaPrecios[columnas[0].trim().toLowerCase()] = columnas[1].trim();
+                    }
+                });
+
+                const contenedor = document.getElementById("contenedor");
+                
+                productos.forEach(p => {
+                    const precio = mapaPrecios[p.toLowerCase()] || "0.00";
+                    
+                    contenedor.innerHTML += `
+                        <div class="card">
+                            <span class="nombre">${p}</span>
+                            <span class="precio">${precio}<span class="unidad">€</span></span>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error("Error cargando precios:", error);
+            }
+        }
+
+        cargarTienda();
+    </script>
 </body>
 </html>
