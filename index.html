@@ -27,7 +27,8 @@
         async function obtenerDatos() {
             const { data, error } = await supabaseClient
                 .from('Snacks') 
-                .select('*');
+                .select('*')
+                .order('Nombre', { ascending: true });
 
             if (error) {
                 console.error('Error:', error);
