@@ -12,9 +12,7 @@
         <h1>Mis Snacks</h1>
     </header>
 
-    <div id="lista-productos">
-        <p>Cargando snacks deliciosos...</p>
-    </div>
+    
     <div class="combobox-container" style="margin-bottom: 20px;">
       <label for="frutas-choice">Filtra por categoría:</label>
       <input list="frutas" id="frutas-choice" name="fruta" placeholder="Selecciona una opción..." />
@@ -31,7 +29,9 @@
         <option value="Vehículo">
       </datalist>
     </div>
-    
+    <div id="lista-productos">
+        <p>Cargando snacks deliciosos...</p>
+    </div>
     <div id="lista-productos"></div>
     
     <script>
@@ -147,6 +147,31 @@ obtenerDatosFiltrados("");
         body{
             background-color: grey;
             text-align: center;
+        }
+        .combobox-container {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+        }
+    
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+        }
+    
+        input {
+            padding: 10px 15px;
+            width: 250px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+    
+        input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
         }
     </style>
 </html>
