@@ -59,6 +59,10 @@
         🍬 Gominolas
     </button>
     
+    <button id="btnsnacks" style="padding: 10px 20px; border-radius: 8px; cursor: pointer; background-color: purple; color: white; border: 2px solid purple; font-weight: bold; font-size: 16px; margin-bottom: 20px; margin-right: 10px;">
+        🍿 Cargar Snacks
+    </button>
+    
     <div class="combobox-container">
         <label for="filtro-tipo">Filtra por categoría:</label>
         <select id="filtro-tipo">
@@ -140,7 +144,7 @@
         }
         
         // 5. Cargamos todo al inicio
-        obtenerDatosFiltrados("");
+        
 
         // ---------------------- GOMINOLAS ---------------------- //
         const btnGominolas = document.getElementById('btngominolas');
@@ -197,6 +201,20 @@
                 contenedor.appendChild(card);
             });
         }
+        
+        // -------------------------- Seleccionar Snacks -------------------------------- //
+        // 1. Seleccionamos el nuevo botón de Snacks
+        const btnSnacks = document.getElementById('btnsnacks');
+        
+        // 2. Escuchamos el clic
+        btnSnacks.addEventListener('click', () => {
+            // Reseteamos el desplegable para que vuelva a poner "-- Todos los productos --"
+            document.getElementById('filtro-tipo').value = "";
+            
+            // Usamos la función maestra que ya tenías pasándole un valor vacío
+            // Esto hace que cargue todos los snacks sin ningún filtro
+            obtenerDatosFiltrados("");
+        });
     </script>
 </body>
 </html>
