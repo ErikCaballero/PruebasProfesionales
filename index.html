@@ -63,6 +63,10 @@
         🍿 Snacks
     </button>
     
+    <div style="margin-bottom: 20px;">
+        <input type="text" id="buscador" placeholder="🔍 Buscar por nombre..." style="padding: 10px; width: 250px; border-radius: 8px; border: 2px solid #ddd; font-size: 16px; outline: none;">
+    </div>
+    
     <div class="combobox-container">
         <label for="filtro-tipo">Filtra por categoría:</label>
         <select id="filtro-tipo">
@@ -82,32 +86,79 @@
     <div id="lista-productos">
         <p style="color: white;">Cargando snacks deliciosos...</p>
     </div>
+
     
     <script>
         // 1. Configuración e Inicialización
         const _supabaseUrl = 'https://cbtvetmvxvxhidsgpcoh.supabase.co';
         const _supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNidHZldG12eHZ4aGlkc2dwY29oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4MzM4NzMsImV4cCI6MjA4NzQwOTg3M30.kphDJaqTCBzHuDSraol0gaDOTMfYf7eHNHaQGy3Ab7o'; 
         const supabaseClient = supabase.createClient(_supabaseUrl, _supabaseKey);
-
-        // 2. Seleccionamos el desplegable
-        const selectFiltro = document.getElementById('filtro-tipo');
         
-        // 3. Escuchamos el evento 'change'
+        // VARIABLE GLOBAL: Nos dice en qué tabla estamos (empieza en Snacks)
+        let vistaActual = 'Snacks';
+        
+        // 2. Seleccionamos los elementos del HTML
+        const selectFiltro = document.getElementById('filtro-tipo');
+        const btnSnacks = document.getElementById('btnsnacks');
+        const btnGominolas = document.getElementById('btngominolas');
+        const buscador = document.getElementById('buscador');
+        
+        // 3. Evento: Cambiar categoría (Solo afecta a Snacks)
         selectFiltro.addEventListener('change', (event) => {
-            const categoriaSeleccionada = event.target.value;
-            obtenerDatosFiltrados(categoriaSeleccionada);
+            const categoria = event.target.value;
+            const textoBuscado = buscador.value; // Cogemos lo que haya en el buscador
+            obtenerDatosFiltrados(categoria, textoBuscado);
         });
         
-        // 4. La Función MAESTRA (Hace el trabajo de mostrar todo o filtrar)
-        async function obtenerDatosFiltrados(tipoSeleccionado) {
+        // 4. Evento: Escribir en el buscador
+        buscador.addEventListener('input', (event) => {
+            const textoBuscado = event.target.value;
+            
+            // Dependiendo de dónde estemos, buscamos en una tabla u otra
+            if (vistaActual === 'Snacks') {
+                const categoria = selectFiltro.value;
+                obtenerDatosFiltrados(categoria, textoBuscado);
+            } else {
+                obtenerGominolas(textoBuscado);
+            }
+        });
+        
+        // 5. Evento: Botón Cargar Snacks
+        btnSnacks.addEventListener('click', () => {
+            vistaActual = 'Snacks'; // Actualizamos el estado
+            selectFiltro.value = ""; // Reseteamos categoría
+            buscador.value = ""; // Reseteamos el buscador
+            obtenerDatosFiltrados("", "");
+        });
+        
+        // 6. Evento: Botón Cargar Gominolas
+        btnGominolas.addEventListener('click', () => {
+            vistaActual = 'Gominolas'; // Actualizamos el estado
+            selectFiltro.value = ""; 
+            buscador.value = ""; 
+            obtenerGominolas("");
+        });
+        
+        // ==========================================
+        // FUNCIONES QUE CONECTAN CON SUPABASE
+        // ==========================================
+        
+        // Función para SNACKS (Filtra por tipo y/o nombre)
+        async function obtenerDatosFiltrados(tipoSeleccionado, textoBusqueda = "") {
             const contenedor = document.getElementById('lista-productos');
-            contenedor.innerHTML = '<p style="color: white;">Cargando productos...</p>';
+            contenedor.innerHTML = '<p style="color: white;">Cargando snacks...</p>';
         
             let consulta = supabaseClient.from('Snacks').select('*').order('Nombre', { ascending: true });
         
-            // Si hay filtro, se aplica
+            // Si hay categoría, filtramos por ella
             if (tipoSeleccionado && tipoSeleccionado !== "") {
                 consulta = consulta.eq('Tipo', tipoSeleccionado);
+            }
+            
+            // MAGIA: Si hay texto en el buscador, usamos .ilike()
+            // Los símbolos % significan "cualquier cosa antes o después del texto"
+            if (textoBusqueda && textoBusqueda !== "") {
+                consulta = consulta.ilike('Nombre', `%${textoBusqueda}%`);
             }
         
             const { data, error } = await consulta;
@@ -121,15 +172,13 @@
             contenedor.innerHTML = ''; 
         
             if (data.length === 0) {
-                contenedor.innerHTML = '<p style="color: white;">No hay productos disponibles en esta categoría.</p>';
+                contenedor.innerHTML = '<p style="color: white;">No hemos encontrado snacks con esa búsqueda.</p>';
                 return;
             }
         
-            // Dibuja las tarjetas manteniendo tu diseño morado
             data.forEach(item => {
                 const card = document.createElement('div');
                 card.style = "border: 2px solid purple; padding: 10px; margin: 10px; border-radius: 8px; display: inline-block; width: 200px; text-align: center; background-color: white; vertical-align: top;";
-        
                 const precioFormateado = item.Precio ? Number(item.Precio).toFixed(2) : "0.00";
         
                 card.innerHTML = `
@@ -138,37 +187,23 @@
                     <b style="color: pink; font-size: 18px;">${precioFormateado}€</b>
                     <p style="font-size: 12px; color: grey; margin-top: 5px;">${item.Tipo || 'Sin categoría'}</p>
                 `;
-                
                 contenedor.appendChild(card);
             });
         }
         
-        // 5. Cargamos todo al inicio
-        
-
-        // ---------------------- GOMINOLAS ---------------------- //
-        const btnGominolas = document.getElementById('btngominolas');
-        
-        // 2. Le decimos que escuche el evento 'click'
-        btnGominolas.addEventListener('click', () => {
-            // Truco visual: Reseteamos el selector de categorías a "Todos los productos" 
-            // para que el usuario no se confunda, ya que las gominolas no tienen categoría.
-            document.getElementById('filtro-tipo').value = ""; 
-            
-            // Llamamos a la función que trae las gominolas
-            obtenerGominolas();
-        });
-        
-        // 3. La función que conecta con la tabla Gominolas
-        async function obtenerGominolas() {
+        // Función para GOMINOLAS (Solo filtra por nombre)
+        async function obtenerGominolas(textoBusqueda = "") {
             const contenedor = document.getElementById('lista-productos');
             contenedor.innerHTML = '<p style="color: white;">Cargando gominolas...</p>';
         
-            // Hacemos la consulta a la nueva tabla 'Gominolas'
-            const { data, error } = await supabaseClient
-                .from('Gominolas')
-                .select('*')
-                .order('Nombre', { ascending: true }); // Las ordenamos alfabéticamente
+            let consulta = supabaseClient.from('Gominolas').select('*').order('Nombre', { ascending: true });
+        
+            // MAGIA DE BÚSQUEDA IGUAL QUE ARRIBA
+            if (textoBusqueda && textoBusqueda !== "") {
+                consulta = consulta.ilike('Nombre', `%${textoBusqueda}%`);
+            }
+        
+            const { data, error } = await consulta;
         
             if (error) {
                 console.error('Error:', error);
@@ -176,20 +211,16 @@
                 return;
             }
         
-            // Limpiamos el texto de "Cargando..."
             contenedor.innerHTML = ''; 
         
             if (data.length === 0) {
-                contenedor.innerHTML = '<p style="color: white;">Aún no hay gominolas en la base de datos.</p>';
+                contenedor.innerHTML = '<p style="color: white;">No hemos encontrado gominolas con esa búsqueda.</p>';
                 return;
             }
         
-            // Dibujamos las tarjetas (¡Ojo! Aquí ya no ponemos el item.Tipo)
             data.forEach(item => {
                 const card = document.createElement('div');
-                // He cambiado un poco el borde a rosa para que se diferencien de los Snacks
                 card.style = "border: 2px solid pink; padding: 10px; margin: 10px; border-radius: 8px; display: inline-block; width: 200px; text-align: center; background-color: white; vertical-align: top;";
-        
                 const precioFormateado = item.Precio ? Number(item.Precio).toFixed(2) : "0.00";
         
                 card.innerHTML = `
@@ -197,24 +228,12 @@
                     <h3 style="color: purple; margin: 10px 0;">${item.Nombre}</h3>
                     <b style="color: pink; font-size: 18px;">${precioFormateado}€</b>
                 `;
-                
                 contenedor.appendChild(card);
             });
         }
         
-        // -------------------------- Seleccionar Snacks -------------------------------- //
-        // 1. Seleccionamos el nuevo botón de Snacks
-        const btnSnacks = document.getElementById('btnsnacks');
-        
-        // 2. Escuchamos el clic
-        btnSnacks.addEventListener('click', () => {
-            // Reseteamos el desplegable para que vuelva a poner "-- Todos los productos --"
-            document.getElementById('filtro-tipo').value = "";
-            
-            // Usamos la función maestra que ya tenías pasándole un valor vacío
-            // Esto hace que cargue todos los snacks sin ningún filtro
-            obtenerDatosFiltrados("");
-        });
+        // 7. Cargamos todo al inicio (Snacks por defecto)
+        obtenerDatosFiltrados("", "");
     </script>
 </body>
 </html>
